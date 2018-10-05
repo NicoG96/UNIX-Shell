@@ -21,12 +21,11 @@
 //functions
 void run_shell();
 void readline(int argc, char *tokens[]);
-void echo(const char* cmd, char **argv);
+void echo(char **argv);
 void environment();
 void cd(const char* cmd, char **argv);
 void clear(const char* cmd, char **argv);
 void dir();
-void environ();
 void help();
 void pause_cmd();
 void quit_cmd();

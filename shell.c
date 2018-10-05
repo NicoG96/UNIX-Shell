@@ -39,9 +39,6 @@ void run_shell() {
         //set argc = to # of args
         argc = i;
 
-        //run through readline
-        readline(argc, argv);
-
         break;
     }
 }

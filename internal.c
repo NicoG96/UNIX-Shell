@@ -1,7 +1,12 @@
 #include "shell.h"
 
-void echo(const char* cmd, char **argv) {
-    printf("echo!!");
+void echo(char **argv) {
+    int i = 0;
+
+    while(argv[i] != NULL) {
+        printf("%s ", argv[i]);
+        i++;
+    }
 }
 
 void cd(const char* cmd, char **argv) {
@@ -20,7 +25,11 @@ void dir() {
 
 }
 
-void environ() {
+void help() {
+
+}
+
+void environment() {
     static const char* SHELL = "N-Shell 0.1b";
 
     char CURR_PATH[1024];
@@ -37,20 +46,13 @@ void environ() {
            "OS Type: \t\t%s\n"
            "Hostname: \t\t%s\n"
            "Current Path: \t%s\n"
-           "===========================================================================================================",
+           "===========================================================================================================\n",
            CURR_USR->pw_name, SHELL, "UNIX", HOSTNAME, CURR_PATH);
 }
 
-void help() {
-
-}
-
-void environment() {
-
-}
-
 void pause_cmd() {
-//pause until enter
+    fflush(stdin);
+    wait(5);
 }
 
 void quit_cmd(const char* cmd, char **argv) {
