@@ -1,16 +1,6 @@
 #ifndef SHELL_H
 #define SHELL_H
 
-
-#if defined(__linux__)
-/* Linux. --------------------------------------------------- */
-char* test = "fuck";
-
-#endif
-
-
-
-
 //libraries
 #include <stdio.h>
 #include <unistd.h>
