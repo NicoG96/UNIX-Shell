@@ -51,11 +51,17 @@ void environment() {
 }
 
 void pause_cmd() {
-    fflush(stdin);
-    wait(5);
+    printf("%s\n", "Shell paused. Press 'c' to continue operation.\n");
+    char ch;
+    scanf("%c", &ch);
+
+    while(ch != 'c' && ch != 'C') {
+        scanf("%c", &ch);
+    }
+    printf("%s\n", "Shell resuming ...\n");
 }
 
-void quit_cmd(const char* cmd, char **argv) {
-    puts("Exiting shell.");
+void quit_cmd() {
+    puts("Exiting shell...");
     exit(0);
 }
