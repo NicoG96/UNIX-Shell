@@ -6,14 +6,14 @@ void run_shell() {
     char CURR_PATH[1024];
     getcwd(CURR_PATH, sizeof(CURR_PATH));
 
-    //var for # of args
-    int argc;
-
     //var for command line
     char line[BUFFER];
 
     //array to hold tokens
     char *argv[BUFFER];
+
+    //counter for arguments
+    int argc = 0;
 
     while(1) {
         //clear stdin
@@ -25,19 +25,8 @@ void run_shell() {
         //get user input
         fgets(line, BUFFER, stdin);
 
-        //tokenize input
-        char *token = strtok(line, " ");
-        int i = 0;
-        while (token != NULL) {
-            argv[i++] = token;
-            token = strtok(NULL, " ");
-        }
-
-        //append NULL to signify end of cmd
-        argv[i] = NULL;
-
-        //set argc = to # of args
-        argc = i;
+        //parse it
+        parse(line, &argc, argv);
 
         break;
     }

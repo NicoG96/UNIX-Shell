@@ -20,6 +20,7 @@
 
 //functions
 void run_shell();
+void parse(char* line, int* argc, char* argv[]);
 void readline(int argc, char *tokens[]);
 void echo(char **argv);
 void environment();
