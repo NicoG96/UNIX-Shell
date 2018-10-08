@@ -1,7 +1,7 @@
 #include "shell.h"
 
 void echo(char **argv) {
-    int i = 0;
+    int i = 1;
 
     while(argv[i] != NULL) {
         printf("%s ", argv[i]);
@@ -15,6 +15,13 @@ void cd(const char* cmd, char **argv) {
         getcwd(buf, sizeof(buf));
         printf("%s\n", buf);
     }
+
+    /*
+     * test:
+     *  ..
+     *  /
+     *  /home
+     */
 }
 
 void clear(const char* cmd, char **argv) {
