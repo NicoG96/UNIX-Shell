@@ -12,19 +12,15 @@ void echo(char **argv) {
     }
 }
 
-void cd(const char* cmd, char **argv) {
-    if (*(argv++) == NULL) {
-        char buf[80];
-        getcwd(buf, sizeof(buf));
-        printf("%s\n", buf);
+void cd(char **argv) {
+    if (*(argv+1) == NULL) {
+        char pwd[BUFFER];
+        getcwd(pwd, sizeof(pwd));
+        printf("%s%s\n", "Current directory: ", pwd);
+    } else {
+        //change directory
+        //test .., /, /home, etc
     }
-
-    /*
-     * test:
-     *  ..
-     *  /
-     *  /home
-     */
 }
 
 void clear(const char* cmd, char **argv) {
@@ -61,14 +57,14 @@ void environment() {
 }
 
 void pause_cmd() {
-    printf("%s\n", "Shell paused. Press 'c' to continue operation.\n");
+    printf("%s\n", "Shell paused. Press 'c' to continue operation.");
     char ch;
     scanf("%c", &ch);
 
     while(ch != 'c' && ch != 'C') {
         scanf("%c", &ch);
     }
-    printf("%s\n", "Shell resuming ...\n");
+    printf("%s", "Shell resuming ...\n");
 }
 
 void quit_cmd() {
