@@ -1,9 +1,12 @@
 #include "shell.h"
 
 void echo(char **argv) {
-    int i = 1;
+    int i = 0;
 
     while(argv[i] != NULL) {
+        if((strcmp(argv[i], "echo") == 0) && i == 0) {
+            i++;
+        }
         printf("%s ", argv[i]);
         i++;
     }
