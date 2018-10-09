@@ -2,11 +2,11 @@
 
 void echo(char **argv) {
     int i = 0;
+    if((strcmp(argv[i], "echo") == 0)) {
+        i++;
+    }
 
     while(argv[i] != NULL) {
-        if((strcmp(argv[i], "echo") == 0) && i == 0) {
-            i++;
-        }
         printf("%s ", argv[i]);
         i++;
     }
