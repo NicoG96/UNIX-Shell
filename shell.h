@@ -16,25 +16,18 @@
 //macros
 #define BUFFER 128
 #define PROMPT "$"
-#define BIN "/bin/"
 
 //functions
 void run_shell();
 void parse(char* line, int* argc, char* argv[]);
-void readline(int argc, char *tokens[]);
 void echo(char **argv);
 void environment();
-void cd(const char* cmd, char **argv);
-void clear(const char* cmd, char **argv);
-void dir();
+void cd(int argc, char **argv);
+void clear();
+void dir(int argc, char **argv);
 void help();
 void pause_cmd();
 void quit_cmd();
-
-//enum
-static const char* shell_cmds[] = {
-    "clear", "cd", "echo", "dir", "environ", "help", "pause", "quit"
-};
-
+void sandbox();
 
 #endif
