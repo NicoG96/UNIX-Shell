@@ -42,8 +42,8 @@ void dir(int argc, char **argv) {
             while((folder = readdir(dir)) != NULL) {
                 printf(">> %s\n", folder->d_name);
             }
+            closedir(dir);
         }
-        closedir(dir);
 
     //list folders in specified dir
     } else{
@@ -59,12 +59,12 @@ void dir(int argc, char **argv) {
             while((folder = readdir(dir)) != NULL) {
                 printf(">> %s\n", folder->d_name);
             }
+            closedir(dir);
         }
-        closedir(dir);
     }
 }
 
-void environment() {
+void environ() {
     static const char* SHELL = "N-Shell 0.1b";
 
     char CURR_PATH[1024];
@@ -90,7 +90,7 @@ void quit_cmd() {
     exit(0);
 }
 
-void clear(const char* cmd, char **argv) {
+void clear() {
     printf("\033[H\033[J");
 }
 
@@ -100,11 +100,9 @@ void help() {
 
 void pause_cmd() {
     printf("%s\n", "Shell paused. Press 'c' to continue operation.");
-    char ch;
-    scanf(" %c", &ch);
 
-    while(ch != 'c' && ch != 'C') {
-        scanf(" %c", &ch);
+    while (getchar() != 'c' && getchar() != 'C') {
+        getchar();
     }
     printf("%s", "Shell resuming ...\n");
 }
