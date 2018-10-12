@@ -26,9 +26,6 @@ void cd(int argc, char **argv) {
             puts("Invalid directory. Please try again.");
         }
     }
-    /*
-     * cd /home
-     */
 }
 
 void dir(int argc, char **argv) {
@@ -69,9 +66,10 @@ void environ() {
            "Hostname: \t\t%s\n"
            "Current Path: \t%s\n"
            "Shell Path: \t%s\n"
+           "Bin Path: \t\t%s\n"
            "Home Path: \t\t%s\n"
            "=====================================================================================================================\n",
-           getenv("USER"), getenv("SHELL"), HOSTNAME, getcwd(pwd, sizeof(pwd)), getenv("PATH"), getenv("HOME"));
+           getenv("USER"), getenv("SHELL"), HOSTNAME, getcwd(pwd, sizeof(pwd)), getenv("SHELL_PATH"), getenv("PATH"), getenv("HOME"));
 }
 
 void quit_cmd() {
