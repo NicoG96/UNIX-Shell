@@ -17,7 +17,6 @@ void cd(int argc, char **argv) {
         char pwd[BUFFER];
         getcwd(pwd, sizeof(pwd));
         printf("%s%s\n", "Current directory: ", pwd);
-        /*get enviro var instead */
 
     } else {
         char * dir = argv[1];
@@ -27,6 +26,9 @@ void cd(int argc, char **argv) {
             puts("Invalid directory. Please try again.");
         }
     }
+    /*
+     * cd /home
+     */
 }
 
 void dir(int argc, char **argv) {
@@ -53,24 +55,23 @@ void dir(int argc, char **argv) {
 }
 
 void environ() {
-    static const char* SHELL = "N-Shell 0.1b";
-
-    char CURR_PATH[1024];
-    getcwd(CURR_PATH, sizeof(CURR_PATH));
-
+    //set hostname
     static char HOSTNAME[1024];
     gethostname(HOSTNAME, sizeof(HOSTNAME));
 
-    struct passwd *CURR_USR = getpwuid(getuid());
+    //set CWD
+    char pwd[BUFFER];
+    getcwd(pwd, sizeof(pwd));
 
-    printf("\n========================================== ENVIRONMENT VARIABLES ==========================================\n"
+    printf("\n=============================================== ENVIRONMENT VARIABLES ===============================================\n"
            "Current User: \t%s\n"
            "Shell Name: \t%s\n"
-           "OS Type: \t\t%s\n"
            "Hostname: \t\t%s\n"
            "Current Path: \t%s\n"
-           "===========================================================================================================\n",
-           CURR_USR->pw_name, SHELL, "UNIX", HOSTNAME, CURR_PATH);
+           "Shell Path: \t%s\n"
+           "Home Path: \t\t%s\n"
+           "=====================================================================================================================\n",
+           getenv("USER"), getenv("SHELL"), HOSTNAME, getcwd(pwd, sizeof(pwd)), getenv("PATH"), getenv("HOME"));
 }
 
 void quit_cmd() {
@@ -79,7 +80,7 @@ void quit_cmd() {
 }
 
 void clear() {
-    printf("\033[H\033[J");
+    printf("\033[H\033[2J");
 }
 
 void help() {
