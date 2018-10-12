@@ -17,6 +17,8 @@ void cd(int argc, char **argv) {
         char pwd[BUFFER];
         getcwd(pwd, sizeof(pwd));
         printf("%s%s\n", "Current directory: ", pwd);
+        /*get enviro var instead */
+
     } else {
         char * dir = argv[1];
         int valid = chdir(dir);
@@ -28,39 +30,25 @@ void cd(int argc, char **argv) {
 }
 
 void dir(int argc, char **argv) {
-    //list folders in current dir
-    if(argc == 1) {
-        DIR * dir;
-        struct dirent * folder;
+    //open dir
+    DIR *dir;
+    struct dirent *folder;
 
-        //open current dir
+    //open current dir or specified dir
+    if (argc == 1) {
         dir = opendir(".");
-
-        if(dir == NULL) {
-            printf("%s\n", "Invalid directory. Please try again.");
-        } else {
-            while((folder = readdir(dir)) != NULL) {
-                printf(">> %s\n", folder->d_name);
-            }
-            closedir(dir);
-        }
-
-    //list folders in specified dir
-    } else{
-        DIR * dir;
-        struct dirent * folder;
-
-        //open relative/absolute dir
+    } else {
         dir = opendir(argv[1]);
+    }
 
-        if(dir == NULL) {
-            printf("%s\n", "Invalid directory. Please try again.");
-        } else {
-            while((folder = readdir(dir)) != NULL) {
-                printf(">> %s\n", folder->d_name);
-            }
-            closedir(dir);
+    //check if entry is valid
+    if (dir == NULL) {
+        printf("%s\n", "Invalid directory. Please try again.");
+    } else {
+        while ((folder = readdir(dir)) != NULL) {
+            printf(">> %s\n", folder->d_name);
         }
+        closedir(dir);
     }
 }
 
