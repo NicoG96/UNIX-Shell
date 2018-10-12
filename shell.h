@@ -12,8 +12,7 @@
 #include <errno.h>
 #include <pwd.h>
 #include <sys/utsname.h>
-extern int errno;
-extern char *environment[];
+#include <fcntl.h>
 
 //macros
 #define BUFFER 128
@@ -30,8 +29,10 @@ void dir(int argc, char **argv);
 void help();
 void pause_cmd();
 void quit_cmd();
-void run_cmd(int argc, char** argv, int* state);
-void ext_exe(int argc, char** argv, int* state);
+void run_shell_cmd(int argc, char** argv, int* state);
+void run_ext_exe(int argc, char** argv, int* state);
+void pipes();
+void redirects();
 void sandbox();
 
 //enum
