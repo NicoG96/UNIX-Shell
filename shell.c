@@ -41,46 +41,53 @@ void run_shell() {
         //parse it
         parse(line, &argc, argv, &state);
 
-        //attempt to run as internal command
-        run_shell_cmd(argc, argv, &state);
+        //if not internal, run as external
+        if (!(run_shell_cmd(argc, argv, state))) {
+            run_ext_exe(argc, argv, state);
+        }
     }
 }
 #pragma clang diagnostic pop
 
-void run_shell_cmd(int argc, char **argv, int* state) {
+int run_shell_cmd(const int argc, char **argv, const int state) {
     if (strcmp(argv[0], "environ") == 0) {
         environ();
         //output redir
+        return 1;
     } else if(strcmp(argv[0], "echo") == 0) {
         echo(argv);
         //
+        return 1;
     }else if (strcmp(argv[0], "help") == 0) {
         help();
         //
+        return 1;
     }else if(strcmp(argv[0], "dir") == 0) {
         dir(argc, argv);
         //
+        return 1;
     }else if(strcmp(argv[0], "cd") == 0) {
         cd(argc, argv);
+        return 1;
     }else if(strcmp(argv[0], "clear") == 0) {
         clear();
+        return 1;
     }else if(strcmp(argv[0], "pause") == 0) {
         pause_cmd();
+        return 1;
     }else if(strcmp(argv[0], "quit") == 0) {
         quit_cmd();
-
-    //attempt to run as external cmd
-    }else {
-        run_ext_exe(argc, argv, state);
+        return 1;
     }
+    return 0;
 }
 
-void run_ext_exe(int argc, char **argv, int* state) {
-    if (*state == normal) {
+void run_ext_exe(const int argc, char **argv, const int state) {
+    if (state == normal) {
         //fork process
         pid_t rc = fork();
         if (rc < 0) {
-            perror("Fork Failure.\n");
+            perror("Fork() failure");
             exit(EXIT_FAILURE);
         }
         //parent
@@ -91,29 +98,29 @@ void run_ext_exe(int argc, char **argv, int* state) {
         //child
         else {
             execvp(argv[0], argv);
-            perror("Child fork problem.");
+            perror("Forking problem");
             exit(EXIT_FAILURE);
         }
     }
 
-    else if (*state == red_in) {
+    else if (state == red_in) {
         //do stuff
     }
 
-    else if (*state == red_out) {
+    else if (state == red_out) {
         //yep
     }
 
-    else if (*state == dub_red_in) {
+    else if (state == dub_red_in) {
         //test
     }
 
-    else if (*state == dub_red_out) {
+    else if (state == dub_red_out) {
         //hello
         int i = 0;
     }
 
-    else if (*state == piping){
+    else if (state == piping){
         //piping fx
         int o = 4;
     }
