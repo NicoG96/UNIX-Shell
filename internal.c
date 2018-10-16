@@ -12,7 +12,7 @@ void echo(char **argv) {
     puts("");
 }
 
-void cd(int argc, char **argv) {
+void cd(const int argc, char **argv) {
     if (argc == 1) {
         char pwd[BUFFER];
         getcwd(pwd, sizeof(pwd));
@@ -23,12 +23,12 @@ void cd(int argc, char **argv) {
         int valid = chdir(dir);
 
         if (valid < 0) {
-            puts("Invalid directory. Please try again.");
+            perror("Error");
         }
     }
 }
 
-void dir(int argc, char **argv) {
+void dir(const int argc, char **argv) {
     //open dir
     DIR *dir;
     struct dirent *folder;
@@ -42,7 +42,7 @@ void dir(int argc, char **argv) {
 
     //check if entry is valid
     if (dir == NULL) {
-        printf("%s\n", "Invalid directory. Please try again.");
+        perror("Error");
     } else {
         while ((folder = readdir(dir)) != NULL) {
             printf(">> %s\n", folder->d_name);
@@ -56,9 +56,8 @@ void environ() {
     static char HOSTNAME[1024];
     gethostname(HOSTNAME, sizeof(HOSTNAME));
 
-    //set CWD
+    //set CWD buf
     char pwd[BUFFER];
-    getcwd(pwd, sizeof(pwd));
 
     printf("\n=============================================== ENVIRONMENT VARIABLES ===============================================\n"
            "Current User: \t%s\n"
@@ -74,7 +73,7 @@ void environ() {
 
 void quit_cmd() {
     puts("Exiting shell...");
-    exit(0);
+    exit(EXIT_SUCCESS);
 }
 
 void clear() {
@@ -82,13 +81,13 @@ void clear() {
 }
 
 void help() {
-
+    //Display the user manual using the more filter.
 }
 
 void pause_cmd() {
     printf("%s\n", "Shell paused. Press 'c' to continue operation.");
 
-    while (getchar() != 'c' && getchar() != 'C') {
+    while (getchar() != 'c' && getchar() != 'C' && getchar() != EOF) {
         getchar();
     }
     printf("%s", "Shell resuming ...\n");
