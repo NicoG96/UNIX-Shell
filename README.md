@@ -75,16 +75,6 @@ If an I/O redirection is detected, the shell will either create an output file o
 The final component to this shell involves batch command processing. With this feature, the shell has the capability to read a file containing a list of commands and consecutively execute them. This is achieved by redirecting the input of the main shell loop to point to that file. This feature can be accessed by first creating a .txt file containing commands with correct syntax on separate lines. The shell must then be launched (or any shell) and you can execute the shell itself, again, as if it were a built-in command with the name of the batch file (or absolute path) as an argument to that command! Another instance of the shell is then launched and automatically parses the file, executing all of its commands.
 
 **Unfinished components**
-1. pause()
-    * huge bug where '\n' does not get cleared from input buffer despite using fflush(stdin)
-    * As such, entering a character exits out of the pause() function but the \n still in the input stream completely breaks the program once it returns out of the function because the parser attempts to reference a bad address
-
-2. clear()
+1. clear()
     * printf("\033[H\033[2J") from guidelines did not work.
-    * Tried innumerable variations of it from the internet, none worked.
-
-3. input buffer bug
-    * this bug is arguably the reason none of these other components work
-    * all seem to fail on some exception error due to the while loop skipping over the next fgets() and still referencing the leftover '\n' from the last command
-    * tried to fix this problem by setting \n to \0 manually, didn't have an effect besides on the actual buffer itself that holds the line, not the input stream
-    * tried scanf, getchar, while(getchar != NULL), while(scanf != NULL), etc., spent hours trying to figure this out
+    * Tried innumerable variations of it from the internet, none worked.t
