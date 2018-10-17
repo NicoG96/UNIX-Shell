@@ -73,8 +73,3 @@ The exact syntax for executing an I/O redirection is detailed in the help manual
 If an I/O redirection is detected, the shell will either create an output file or search for an input file. As such, you must ensure the file you are using as an input redirection is either in the directory you currently reside in (use dir to check) or that you specify an absolute path to the said file. All output files are written to the current working directory (use cd to see where you are).
 
 The final component to this shell involves batch command processing. With this feature, the shell has the capability to read a file containing a list of commands and consecutively execute them. This is achieved by redirecting the input of the main shell loop to point to that file. This feature can be accessed by first creating a .txt file containing commands with correct syntax on separate lines. The shell must then be launched (or any shell) and you can execute the shell itself, again, as if it were a built-in command with the name of the batch file (or absolute path) as an argument to that command! Another instance of the shell is then launched and automatically parses the file, executing all of its commands.
-
-**Unfinished components**
-1. clear()
-    * printf("\033[H\033[2J") from guidelines did not work.
-    * Tried innumerable variations of it from the internet, none worked.t
