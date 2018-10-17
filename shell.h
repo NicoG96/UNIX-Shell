@@ -19,8 +19,7 @@
 #define PROMPT "$"
 
 //functions
-void run_shell();
-void batch_exe(int argc, char** argv);
+int run_shell(int argn, char** args);
 int parse(char* line, int* argc1, char** argv, char ** argv2);
 void echo(char **argv);
 void environ();
