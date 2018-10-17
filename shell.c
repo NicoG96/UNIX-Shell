@@ -236,7 +236,7 @@ int run_ext_exe(int argc, char **argv1, char ** argv2, const int state) {
 
             //command doesn't exist otherwise
             perror("[run_ext_exe] Command not found");
-            return 1;
+            exit(0);
         }
     }
 
@@ -531,7 +531,6 @@ int backgrounding(int argc, char** argv1) {
             help();
             exit(0);
         }
-
 
         execvp(argv1[0], argv1);
 
