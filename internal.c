@@ -81,7 +81,41 @@ void clear() {
 }
 
 void help() {
-    //Display the user manual using the more filter.
+    printf("\n================================================================= HELP MANUAL ==============================================================\n"
+           "\nFUNCTIONS\n"
+           "echo <text>: \t%s\n"
+           "cd [path]: \t\t%s\n"
+           "dir [path]: \t%s\n"
+           "environ: \t\t%s\n"
+           "clear: \t\t\t%s\n"
+           "pause: \t\t\t%s\n"
+           "quit: \t\t\t%s\n\n",
+           "Prints any typed input into the terminal log",
+           "Lists current directory, or changes the  directory to [path]",
+           "Lists the contents of the current directory or the contents of the directory in [path]",
+           "Prints all directories associated with this shell",
+           "Wipes the terminal log",
+           "Pauses the terminal until character is pressed",
+           "Exits the terminal"
+   );
+
+    printf("\nCOMMAND SYNTAX\n"
+           "<command> [-arg1]: \t\t\t\t\t\t\t%s\n"
+           "<command> [-arg1] &: \t\t\t\t\t\t%s\n"
+           "<command> [-arg1] > <outputfile>: \t\t\t%s\n"
+           "<command> [-arg1] >> <outputfile>: \t\t\t%s\n"
+           "<command> [-arg1] | <command> [-arg2]: \t\t%s\n"
+           "<command> < <inputfile>: \t\t\t\t\t%s\n"
+           "<command> < <inputfile> > <outputfile>: \t%s\n",
+           "Execute command with optional arguments",
+           "Execute command without printing to console and immediately prompting for next input",
+           "Execute command and write the output to a specified file, creating it if it doesn't exist",
+           "Execute command and write the output to a specified file, appending to it if it already exists",
+           "Execute first command and use its output as the input for another command",
+           "Execute the command using a specified file as the arguments",
+           "Execute command using specified input and then writing its output to another file"
+           "\n=========================================================================================================================================\n"
+    );
 }
 
 void pause_cmd() {
