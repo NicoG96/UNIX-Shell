@@ -31,10 +31,10 @@ void help();
 void pause_cmd();
 void quit_cmd();
 int run_shell_cmd(int argc, char** argv, int state);
-void run_ext_exe(char** argv, int state);
-void pipes(char** argv);
-void redirects(char **argv, int state);
-void backgrounding(char** argv);
+int run_ext_exe(int argc, char** argv, int state);
+int pipes(int argc, char** argv);
+int redirects(int argc, char **argv, int state);
+int backgrounding(char** argv);
 void sandbox();
 
 //enum
