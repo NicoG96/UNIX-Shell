@@ -33,7 +33,7 @@ int run_shell_cmd(int argc, char** argv1, char ** argv2, int state);
 int run_ext_exe(int argc, char** argv, char ** argv2, int state);
 int pipes(char** argv1, char** argv2);
 int redirects(int argc, char **argv1, char ** argv2, int state);
-int backgrounding(char** argv);
+int backgrounding(int argc, char** argv);
 void sandbox();
 
 //enum
