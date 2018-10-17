@@ -4,6 +4,13 @@
 #pragma clang diagnostic ignored "-Wmissing-noreturn"
 
 int run_shell(int argn, char** args) {
+    /*
+    printf("argc: %d\n", argn);
+    for (int i = 0; i < argn; i++) {
+        printf("argv[%d]:\t%s\n", i, args[i]);
+    }
+     */
+
     //set shell path in the environment
     char pwd[BUFFER];
     getcwd(pwd, sizeof(pwd));
@@ -31,8 +38,8 @@ int run_shell(int argn, char** args) {
 
     int newstdin;
 
-    if (argn > 2) {
-        puts("batch file");
+    if (argn > 1) {
+        //puts("batch file");
         newstdin = open(args[1], O_RDONLY);
         if (newstdin < 0) {
             perror("Batch file couldn't be found");
@@ -44,28 +51,33 @@ int run_shell(int argn, char** args) {
     }
 
     while(1) {
-/*        if (fgets(line, BUFFER, stdin) == NULL) {
-            break;
-        }*/
-
-        //int ch;
-        //while((ch = getchar()) != '\n' && ch != EOF);
-
-        //clear stdin
-        fflush(stdin);
-
         //reset buffers
         memset(line, '\0', BUFFER * sizeof(char));
         memset(argv1, -1, BUFFER * sizeof(char *));
         memset(argv2, -1, BUFFER * sizeof(char *));
         argc1 = 0;
 
-        //prompt
-        printf("%s@%s%s ", getcwd(pwd, sizeof(pwd)), getenv("USER"), PROMPT);
+        //clear stdin
+        fflush(stdin);
 
-        //get keyboard input
-        fgets(line, BUFFER, stdin);
-        printf("%s\n", line);
+        //prompt
+        if (argn == 1) {
+            printf("%s@%s%s ", getcwd(pwd, sizeof(pwd)), getenv("USER"), PROMPT);
+        }
+
+        if (fgets(line, BUFFER, stdin) == NULL) {
+            break;
+        }
+        //printf("getline: %s\n", line);
+
+
+        /*
+         * fgets(input, (int)length, stdin);
+            if(strlen(input) == length && input[length - 1] != '\n'){
+                while ((ch = getchar()) != '\n' && ch != EOF)
+            }
+         */
+
 
         //get rid of '\n' first
         size_t len = strlen(line);
@@ -77,7 +89,7 @@ int run_shell(int argn, char** args) {
         state = parse(line, &argc1, argv1, argv2);
         /*
         for (int i = 0; i < *argc; i++) {
-            printf("argv1[%d]:\t%s\n", i, argv1[i]);
+            printf("after parse: argv1[%d]:\t%s\n", i, argv1[i]);
         }
         printf("argv2[%d]:\t%s\n", 0, argv2[0]);
         printf("argc:\t%d\n", *argc);
