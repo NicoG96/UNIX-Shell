@@ -1,6 +1,15 @@
 #include "shell.h"
 
 int parse(char* line, int* argc1, char** argv1, char** argv2) {
+    /*
+    printf("%s\n", line);
+    printf("%d\n", *argc1);
+    char *token = strtok(line, " ");
+    while (token != NULL) {
+        printf("%s\n", argv1[1]);
+        token = strtok(NULL, " ");
+    }
+*/
     char *token = strtok(line, " ");
     int state = normal;
     int argc2 = 0;

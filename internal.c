@@ -13,6 +13,10 @@ void echo(char **argv) {
 }
 
 void cd(const int argc, char **argv) {
+    /*
+    printf("%s\n", argv[0]);
+    printf("%s\n", argv[1]);
+    */
     if (argc == 1) {
         char pwd[BUFFER];
         getcwd(pwd, sizeof(pwd));
@@ -29,6 +33,10 @@ void cd(const int argc, char **argv) {
 }
 
 void dir(const int argc, char **argv) {
+    /*
+    printf("%s\n", argv[0]);
+    printf("%s\n", argv[1]);
+    */
     //open dir
     DIR *dir;
     struct dirent *folder;
