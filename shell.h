@@ -19,7 +19,8 @@
 #define PROMPT "$"
 
 //functions
-void run_shell(int argc, char** argv);
+void run_shell();
+void batch_exe(int argc, char** argv);
 void parse(char* line, int* argc, char** argv, int* state);
 void echo(char **argv);
 void environ();
@@ -30,7 +31,7 @@ void help();
 void pause_cmd();
 void quit_cmd();
 int run_shell_cmd(int argc, char** argv, int state);
-void run_ext_exe(int argc, char** argv, int state);
+void run_ext_exe(char** argv, int state);
 void pipes(char** argv);
 void redirects(char **argv, int state);
 void backgrounding(char** argv);
