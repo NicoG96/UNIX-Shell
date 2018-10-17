@@ -88,5 +88,3 @@ The final component to this shell involves batch command processing. With this f
     * all seem to fail on some exception error due to the while loop skipping over the next fgets() and still referencing the leftover '\n' from the last command
     * tried to fix this problem by setting \n to \0 manually, didn't have an effect besides on the actual buffer itself that holds the line, not the input stream
     * tried scanf, getchar, while(getchar != NULL), while(scanf != NULL), etc., spent hours trying to figure this out
-4. batch file execution
-    * see above
