@@ -91,9 +91,9 @@ void clear() {
 void help() {
     printf("\n================================================================= HELP MANUAL ==============================================================\n"
            "\nFUNCTIONS\n"
-           "echo <text>: \t%s\n"
+           "echo <text>: \t\t%s\n"
            "cd [path]: \t\t%s\n"
-           "dir [path]: \t%s\n"
+           "dir [path]: \t\t%s\n"
            "environ: \t\t%s\n"
            "clear: \t\t\t%s\n"
            "pause: \t\t\t%s\n"
@@ -108,12 +108,12 @@ void help() {
    );
 
     printf("\nCOMMAND SYNTAX\n"
-           "<command> [-arg1]: \t\t\t\t\t\t\t%s\n"
-           "<command> [-arg1] &: \t\t\t\t\t\t%s\n"
-           "<command> [-arg1] > <outputfile>: \t\t\t%s\n"
-           "<command> [-arg1] >> <outputfile>: \t\t\t%s\n"
+           "<command> [-arg1]: \t\t\t\t%s\n"
+           "<command> [-arg1] &: \t\t\t\t%s\n"
+           "<command> [-arg1] > <outputfile>: \t\t%s\n"
+           "<command> [-arg1] >> <outputfile>: \t\t%s\n"
            "<command> [-arg1] | <command> [-arg2]: \t\t%s\n"
-           "<command> < <inputfile>: \t\t\t\t\t%s\n"
+           "<command> < <inputfile>: \t\t\t%s\n"
            "<command> < <inputfile> > <outputfile>: \t%s\n",
            "Execute command with optional arguments",
            "Execute command without printing to console and immediately prompting for next input",
