@@ -396,53 +396,36 @@ int pipes(char **argv1, char **argv2) {
 
     //parent
     else if (rc > 0) {
+        wait(&rc);
+
         //close stdin
         close(0);
 
-        //set stdin to the output pipe
+        //set stdin to the read pipe
         dup2(pfds[0], 0);
 
         //close write end
         close(pfds[1]);
 
-        //wait for child to finish process before taking input
-        wait(&rc);
+        execvp(argv2[0], argv2);
 
-        //create another child process to execute 2nd command
-        pid_t rc2 = fork();
+        //else, search the bin
+        //puts("Searching bin ...");
+        char *binpath = getenv("PATH");
+        strcat(binpath, "/");
+        strcat(binpath, argv2[0]);
+        execvp(binpath, argv2);
 
-        if (rc2 < 0) {
-            perror("[Piping] Fork of fork error");
-            return 1;
-        }
+        //finally, search the shell's directory
+        //puts("Searching shell directory ...");
+        char *shellpath = getenv("SHELL_PATH");
+        strcat(shellpath, "/");
+        strcat(shellpath, argv2[0]);
+        execvp(shellpath, argv2);
 
-        //parent
-        else if (rc2 > 0) {
-            wait(&rc2);
-        }
-
-        //child2 after child1 finishes
-        else{
-            execvp(argv2[0], argv2);
-
-            //else, search the bin
-            //puts("Searching bin ...");
-            char *binpath = getenv("PATH");
-            strcat(binpath, "/");
-            strcat(binpath, argv2[0]);
-            execvp(binpath, argv2);
-
-            //finally, search the shell's directory
-            //puts("Searching shell directory ...");
-            char *shellpath = getenv("SHELL_PATH");
-            strcat(shellpath, "/");
-            strcat(shellpath, argv2[0]);
-            execvp(shellpath, argv2);
-
-            //command doesn't exist otherwise
-            perror("[Piping] Command not found");
-            return 1;
-        }
+        //command doesn't exist otherwise
+        perror("[Piping] Command not found");
+        return 1;
     }
 
     //child
@@ -450,7 +433,7 @@ int pipes(char **argv1, char **argv2) {
         //close stdout
         close(1);
 
-        //set stdout to the input pipe
+        //set stdout to the write pipe
         dup2(pfds[1], 1);
 
         //close read end
