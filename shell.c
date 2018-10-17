@@ -1,8 +1,5 @@
 #include "shell.h"
 
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wmissing-noreturn"
-
 int run_shell(int argn, char** args) {
     /*
     printf("argc: %d\n", argn);
@@ -100,7 +97,6 @@ int run_shell(int argn, char** args) {
         }
     }
 }
-#pragma clang diagnostic pop
 
 int run_shell_cmd(const int argc, char **argv1, char ** argv2, const int state) {
     /* print passed arguments
