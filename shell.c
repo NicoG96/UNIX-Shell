@@ -57,8 +57,9 @@ int run_shell(int argn, char** args) {
         memset(argv2, -1, BUFFER * sizeof(char *));
         argc1 = 0;
 
-        //clear stdin
+        //clear stdi/o
         fflush(stdin);
+        fflush(stdout);
 
         //prompt
         if (argn == 1) {
@@ -70,14 +71,10 @@ int run_shell(int argn, char** args) {
         }
         //printf("getline: %s\n", line);
 
-
-        /*
-         * fgets(input, (int)length, stdin);
-            if(strlen(input) == length && input[length - 1] != '\n'){
-                while ((ch = getchar()) != '\n' && ch != EOF)
-            }
-         */
-
+        //catch any newlines still in stream
+        if (line[0] == '\n') {
+            continue;
+        }
 
         //get rid of '\n' first
         size_t len = strlen(line);
@@ -86,7 +83,9 @@ int run_shell(int argn, char** args) {
         }
 
         //parse it
-        state = parse(line, &argc1, argv1, argv2);
+        if ((state = parse(line, &argc1, argv1, argv2)) < 0) {
+            continue;
+        }
         /*
         for (int i = 0; i < *argc; i++) {
             printf("after parse: argv1[%d]:\t%s\n", i, argv1[i]);
@@ -116,8 +115,13 @@ int run_shell_cmd(const int argc, char **argv1, char ** argv2, const int state) 
     */
     if (strcmp(argv1[0], "environ") == 0) {
         //if it's not normal, then it's a redirection (only supported for environ, echo, help, dir)
-        if (state != normal) {
+        if (state != normal && state != background) {
             redirects(argc, argv1, argv2, state);
+            return 0;
+        }
+
+        if (state == background) {
+            backgrounding(argc, argv1);
             return 0;
         }
         environ();
@@ -125,8 +129,13 @@ int run_shell_cmd(const int argc, char **argv1, char ** argv2, const int state) 
     }
 
     else if(strcmp(argv1[0], "echo") == 0) {
-        if (state != normal) {
+        if (state != normal & state != background) {
             redirects(argc, argv1, argv2, state);
+            return 0;
+        }
+
+        if (state == background) {
+            backgrounding(argc, argv1);
             return 0;
         }
         echo(argv1);
@@ -134,8 +143,13 @@ int run_shell_cmd(const int argc, char **argv1, char ** argv2, const int state) 
     }
 
     else if (strcmp(argv1[0], "help") == 0) {
-        if (state != normal) {
+        if (state != normal & state != background) {
             redirects(argc, argv1, argv2, state);
+            return 0;
+        }
+
+        if (state == background) {
+            backgrounding(argc, argv1);
             return 0;
         }
         help();
@@ -143,8 +157,13 @@ int run_shell_cmd(const int argc, char **argv1, char ** argv2, const int state) 
     }
 
     else if(strcmp(argv1[0], "dir") == 0) {
-        if (state != normal) {
+        if (state != normal & state != background) {
             redirects(argc, argv1, argv2, state);
+            return 0;
+        }
+
+        if (state == background) {
+            backgrounding(argc, argv1);
             return 0;
         }
         dir(argc, argv1);
@@ -242,7 +261,7 @@ int run_ext_exe(int argc, char **argv1, char ** argv2, const int state) {
     //otherwise its backgrounding
     else {
         //puts("Background");
-        backgrounding(argv1);
+        backgrounding(argc, argv1);
         return 0;
     }
     return 1;
@@ -313,7 +332,7 @@ int redirects(int argc, char **argv1, char **argv2, const int state) {
         }
 
         //input && output redirection
-        else {
+        else if (state == in_out){
             newstdin = open(argv2[0], O_RDONLY);
             newstdout = open(argv2[1], O_WRONLY|O_CREAT, S_IRWXU|S_IRWXG|S_IRWXO);
 
@@ -337,20 +356,20 @@ int redirects(int argc, char **argv1, char **argv2, const int state) {
         //check if it's an internal command first
         if (strcmp(argv1[0], "dir") == 0) {
             dir(argc, argv1);
-            return 0;
+            exit(0);
         }
         else if (strcmp(argv1[0], "environ") == 0) {
             environ();
-            return 0;
+            exit(0);
         }
 
         else if (strcmp(argv1[0], "echo") == 0) {
             echo(argv1);
-            return 0;
+            exit(0);
         }
         else if (strcmp(argv1[0], "help") == 0) {
             help();
-            return 0;
+            exit(0);
         }
 
         //if not internal, must be external
@@ -474,7 +493,7 @@ int pipes(char **argv1, char **argv2) {
     return 0;
 }
 
-int backgrounding(char** argv1) {
+int backgrounding(int argc, char** argv1) {
     /*
     char *token = strtok(*argv1, " ");
     while (token != NULL) {
@@ -490,14 +509,34 @@ int backgrounding(char** argv1) {
     }
     //parent
     else if (rc > 0) {
-        //close stdout
-        close(1);
+        //no need to wait
     }
 
     //child
     else {
         //close stdout
         close(1);
+
+        //check if it's an internal command first
+        if (strcmp(argv1[0], "dir") == 0) {
+            dir(argc, argv1);
+            exit(0);
+        }
+        else if (strcmp(argv1[0], "environ") == 0) {
+            environ();
+            exit(0);
+        }
+
+        else if (strcmp(argv1[0], "echo") == 0) {
+            echo(argv1);
+            exit(0);
+        }
+        else if (strcmp(argv1[0], "help") == 0) {
+            help();
+            exit(0);
+        }
+
+
         execvp(argv1[0], argv1);
 
         //else, search the bin
