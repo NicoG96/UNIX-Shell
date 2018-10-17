@@ -9,25 +9,50 @@ void run_shell() {
     getcwd(pwd, sizeof(pwd));
     strcat(pwd, "/myshell");
     setenv("SHELL_PATH", pwd, 1);
+    /*
+    for (int i = 0; i < argc; i++) {
+        printf("%s\n", args[i]);
+    }
+    printf("%s", getenv("SHELL_PATH"));
+    printf("%d", argn);
+    */
 
-    //var for command line
+    //buffer for command line
     char line[BUFFER];
 
-    //array to hold arg tokens
+    //array of strings to hold arguments
     char *argv[BUFFER];
 
     //counter for # of arguments
-    int argc = 0;
+    int argc;
+
+    /*
+    //array1 to hold arguments, arrray2 for possible redirections/piping
+    int* argc;
+    int argc1 = 0;
+    int argc2 = 0;
+
+    char *argv1[BUFFER];
+    char *argv2[BUFFER];
+
+    char **argv = argv1;
+    argc = &argc1;
+    */
 
     while(1) {
         //clear stdin
         fflush(stdin);
 
+        //reset buffers
+        memset(line, '\0', BUFFER * sizeof(char));
+        memset(argv, -1, BUFFER * sizeof(char *));
+
         //prompt
         printf("%s@%s%s ", getcwd(pwd, sizeof(pwd)), getenv("USER"), PROMPT);
 
-        //get user input
+        //get keyboard input
         fgets(line, BUFFER, stdin);
+        //printf("%s\n", line);
 
         //get rid of '\n' first
         size_t len = strlen(line);
@@ -41,40 +66,113 @@ void run_shell() {
         //parse it
         parse(line, &argc, argv, &state);
 
+        /*
+        for (int i = 0; i < argc; i++) {
+            printf("arg[%d]:\t%s\n", i, argv[i]);
+        }
+        printf("State:\t%d\n", state);
+        printf("argc:\t%d\n", argc);
+        */
+
         //if not internal, run as external
         if (!(run_shell_cmd(argc, argv, state))) {
-            run_ext_exe(argc, argv, state);
+            run_ext_exe(argv, state);
         }
     }
 }
 #pragma clang diagnostic pop
 
+void batch_exe(int argc, char** argv) {
+    char line[BUFFER];
+    FILE *file = fopen(argv[1], "r");
+
+    //if file can't be opened
+    if (!file) {
+        perror("fopen() error");
+        exit(EXIT_FAILURE);
+    }
+
+    //puts("Shell opened file successfully.");
+    while (fgets(line, BUFFER, file) != NULL) {
+        //printf("%s", line);
+
+        //get rid of '\n' first
+        size_t len = strlen(line);
+        if(line[len - 1] == '\n') {
+            line[len - 1] = '\0';
+        }
+        //printf("%s\n", line);
+
+        //variable to hold state, assume normal input
+        int state = normal;
+
+        //parse it
+        parse(line, &argc, argv, &state);
+
+        /*
+        for (int i = 0; i < argc; i++) {
+            printf("arg[%d]:\t%s\n", i, argv[i]);
+        }
+        printf("argc:\t%d\n", argc);
+        printf("State:\t%d\n", state);
+        puts("===== NEXT COMMAND =====");
+        */
+
+        //if not internal, run as external
+        if (!(run_shell_cmd(argc, argv, state))) {
+            run_ext_exe(argv, state);
+        }
+    }
+    fclose(file);
+    exit(EXIT_SUCCESS);
+}
+
 int run_shell_cmd(const int argc, char **argv, const int state) {
     if (strcmp(argv[0], "environ") == 0) {
+        //if it's not normal, then it's a redirection (only supported for environ, echo, help, dir)
+        if (state != normal) {
+            redirects(argv, state);
+            return 1;
+        }
         environ();
-        //output redir
         return 1;
+
     } else if(strcmp(argv[0], "echo") == 0) {
+        if (state != normal) {
+            redirects(argv, state);
+            return 1;
+        }
         echo(argv);
-        //
         return 1;
+
     }else if (strcmp(argv[0], "help") == 0) {
+        if (state != normal) {
+            redirects(argv, state);
+            return 1;
+        }
         help();
-        //
         return 1;
+
     }else if(strcmp(argv[0], "dir") == 0) {
+        if (state != normal) {
+            redirects(argv, state);
+            return 1;
+        }
         dir(argc, argv);
-        //
         return 1;
+
     }else if(strcmp(argv[0], "cd") == 0) {
         cd(argc, argv);
         return 1;
+
     }else if(strcmp(argv[0], "clear") == 0) {
         clear();
         return 1;
+
     }else if(strcmp(argv[0], "pause") == 0) {
         pause_cmd();
         return 1;
+
     }else if(strcmp(argv[0], "quit") == 0) {
         quit_cmd();
         return 1;
@@ -82,8 +180,10 @@ int run_shell_cmd(const int argc, char **argv, const int state) {
     return 0;
 }
 
-void run_ext_exe(const int argc, char **argv, const int state) {
+void run_ext_exe(char **argv, const int state) {
+    //if no redirection, run command normally
     if (state == normal) {
+        //puts("Normal");
         //fork process
         pid_t rc = fork();
         if (rc < 0) {
@@ -92,45 +192,36 @@ void run_ext_exe(const int argc, char **argv, const int state) {
         }
         //parent
         else if (rc > 0) {
-            int status = 0;
-            wait(&status);
+            wait(&rc);
         }
         //child
         else {
             execvp(argv[0], argv);
-            perror("Forking problem");
+            perror("Command not found");
             exit(EXIT_FAILURE);
         }
     }
 
-    else if (state == red_in) {
-        //do stuff
+    //if it's redirection, send to respective function
+    else if (state == red_in || state == red_out || state == dub_red_out || state == dub_red_in || state == in_out) {
+        //puts("Redirection");
+        redirects(argv, state);
     }
 
-    else if (state == red_out) {
-        //yep
+    //if it's piping, do same
+    else if(state == piping) {
+        //puts("Piping");
+        pipes(argv);
     }
 
-    else if (state == dub_red_in) {
-        //test
-    }
-
-    else if (state == dub_red_out) {
-        //hello
-        int i = 0;
-    }
-
-    else if (state == piping){
-        //piping fx
-        int o = 4;
-    }
-
+    //otherwise its backgrounding
     else {
-        //backgrounding, disable stdout
+        //puts("Background");
+        backgrounding(argv);
     }
 }
 
-void redirects() {
+void redirects(char **argv, const int state) {
     int fd;
     //int fd = fopen("output", O_CREAT|O_WRONLY, S_IRWXU);
     printf("%d\n", fd);
@@ -139,12 +230,7 @@ void redirects() {
     close(fd);
 }
 
-void pipes() {
-    /*
-     * shellcmdhandler handler1 = findhandler(cmdlist, argv1[0])
-     * shellcmdhandler handler2 = findhandler(cmdlist, argv2[0])
-     */
-
+void pipes(char **argv) {
     //create file descriptor
     int pfds[2];
 
@@ -186,3 +272,26 @@ void pipes() {
         }
     }
 }
+
+void backgrounding(char** argv) {
+    //fork process
+    pid_t rc = fork();
+    if (rc < 0) {
+        perror("Fork() failure");
+        exit(EXIT_FAILURE);
+    }
+        //parent
+    else if (rc > 0) {
+        //close stdout
+        close(1);
+    }
+
+        //child
+    else {
+        //close stdout
+        close(1);
+        execvp(argv[0], argv);
+        perror("Unkown command");
+        exit(EXIT_FAILURE);
+    }
+};
