@@ -3,7 +3,7 @@
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wmissing-noreturn"
 
-void run_shell() {
+int run_shell(int argn, char** args) {
     //set shell path in the environment
     char pwd[BUFFER];
     getcwd(pwd, sizeof(pwd));
@@ -29,7 +29,28 @@ void run_shell() {
     //var to hold type of command
     int state;
 
+    int newstdin;
+
+    if (argn > 2) {
+        puts("batch file");
+        newstdin = open(args[1], O_RDONLY);
+        if (newstdin < 0) {
+            perror("Batch file couldn't be found");
+            return 1;
+        }
+        close(0);
+        dup(newstdin);
+        close(newstdin);
+    }
+
     while(1) {
+/*        if (fgets(line, BUFFER, stdin) == NULL) {
+            break;
+        }*/
+
+        int ch;
+        while((ch = getchar()) != '\n' && ch != EOF);
+
         //clear stdin
         fflush(stdin);
 
@@ -37,17 +58,18 @@ void run_shell() {
         memset(line, '\0', BUFFER * sizeof(char));
         memset(argv1, -1, BUFFER * sizeof(char *));
         memset(argv2, -1, BUFFER * sizeof(char *));
+        argc1 = 0;
 
         //prompt
         printf("%s@%s%s ", getcwd(pwd, sizeof(pwd)), getenv("USER"), PROMPT);
 
         //get keyboard input
         fgets(line, BUFFER, stdin);
-        //printf("%s\n", line);
+        printf("%s\n", line);
 
         //get rid of '\n' first
         size_t len = strlen(line);
-        if(line[len - 1] == '\n') {
+        if(line[len - 1] == '\n' && len > 1) {
             line[len - 1] = '\0';
         }
 
@@ -67,61 +89,9 @@ void run_shell() {
             run_ext_exe(*argc, argv1, argv2, state);
         }
     }
+    return 0;
 }
 #pragma clang diagnostic pop
-
-void batch_exe(int argn, char** args) {
-    char line[BUFFER];
-    FILE *file = fopen(args[1], "r");
-
-    //if file can't be opened
-    if (!file) {
-        perror("fopen() error");
-        exit(EXIT_FAILURE);
-    }
-
-    //arrays for arguments, accounting for potential redirection or piping
-    char *argv1[BUFFER];
-    char *argv2[BUFFER];
-
-    //initialize arg counts for respective arrays
-    int argc1 = 0;
-    int * argc = &argc1;
-
-    //var to hold type of command
-    int state;
-
-    //puts("Shell opened file successfully.");
-    while (fgets(line, BUFFER, file) != NULL) {
-        //printf("%s", line);
-
-        //get rid of '\n' first
-        size_t len = strlen(line);
-        if(line[len - 1] == '\n') {
-            line[len - 1] = '\0';
-        }
-        //printf("%s\n", line);
-
-        //parse it
-        state = parse(line, argc, argv1, argv2);
-
-        /*
-        for (int i = 0; i < argc; i++) {
-            printf("arg[%d]:\t%s\n", i, argv1[i]);
-        }
-        printf("argc:\t%d\n", argc);
-        printf("State:\t%d\n", state);
-        puts("===== NEXT COMMAND =====");
-        */
-
-        //if not internal, run as external
-        if (!(run_shell_cmd(*argc, argv1, argv2, state))) {
-            run_ext_exe(*argc, argv1, argv2, state);
-        }
-    }
-    fclose(file);
-    exit(EXIT_SUCCESS);
-}
 
 int run_shell_cmd(const int argc, char **argv1, char ** argv2, const int state) {
     /* print passed arguments
@@ -139,44 +109,53 @@ int run_shell_cmd(const int argc, char **argv1, char ** argv2, const int state) 
         }
         environ();
         return 0;
+    }
 
-    } else if(strcmp(argv1[0], "echo") == 0) {
+    else if(strcmp(argv1[0], "echo") == 0) {
         if (state != normal) {
             redirects(argc, argv1, argv2, state);
             return 0;
         }
         echo(argv1);
         return 0;
+    }
 
-    }else if (strcmp(argv1[0], "help") == 0) {
+    else if (strcmp(argv1[0], "help") == 0) {
         if (state != normal) {
             redirects(argc, argv1, argv2, state);
             return 0;
         }
         help();
         return 0;
+    }
 
-    }else if(strcmp(argv1[0], "dir") == 0) {
+    else if(strcmp(argv1[0], "dir") == 0) {
+        //puts("dir");
         if (state != normal) {
+            //puts("dir redirct");
             redirects(argc, argv1, argv2, state);
             return 0;
         }
         dir(argc, argv1);
         return 0;
+    }
 
-    }else if(strcmp(argv1[0], "cd") == 0) {
+    else if(strcmp(argv1[0], "cd") == 0) {
         cd(argc, argv1);
         return 0;
+    }
 
-    }else if(strcmp(argv1[0], "clear") == 0) {
+    else if(strcmp(argv1[0], "clear") == 0) {
         clear();
         return 0;
+    }
 
-    }else if(strcmp(argv1[0], "pause") == 0) {
+    else if(strcmp(argv1[0], "pause") == 0) {
         pause_cmd();
         return 0;
+    }
 
-    }else if(strcmp(argv1[0], "quit") == 0) {
+    else if(strcmp(argv1[0], "quit") == 0) {
         quit_cmd();
         return 0;
     }
@@ -340,6 +319,7 @@ int redirects(int argc, char **argv1, char **argv2, const int state) {
             close(newstdout);
         }
 
+        //printf("%s\n", argv1[0]);
         //check if it's an internal command first
         if (strcmp(argv1[0], "dir") == 0) {
             dir(argc, argv1);
@@ -505,7 +485,6 @@ int backgrounding(char** argv1) {
     else if (rc > 0) {
         //close stdout
         close(1);
-        //waitpid(pid,&status,0);
     }
 
     //child
@@ -513,7 +492,23 @@ int backgrounding(char** argv1) {
         //close stdout
         close(1);
         execvp(argv1[0], argv1);
-        perror("Unkown command");
+
+        //else, search the bin
+        //puts("Searching bin ...");
+        char *binpath = getenv("PATH");
+        strcat(binpath, "/");
+        strcat(binpath, argv1[0]);
+        execvp(binpath, argv1);
+
+        //finally, search the shell's directory
+        //puts("Searching shell directory ...");
+        char *shellpath = getenv("SHELL_PATH");
+        strcat(shellpath, "/");
+        strcat(shellpath, argv1[0]);
+        execvp(shellpath, argv1);
+
+        //command doesn't exist otherwise
+        perror("[Piping] Command not found");
         return 1;
     }
     return 0;
