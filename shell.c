@@ -217,13 +217,13 @@ int run_ext_exe(int argc, char **argv, const int state) {
             execvp(shellpath, argv);
 
             //command doesn't exist otherwise
-            perror("Command not found");
+            perror("[run_ext_exe] Command not found");
             return 1;
         }
     }
 
     //if it's redirection, send to respective function
-    else if (state == red_in || state == red_out || state == dub_red_out || state == dub_red_in || state == in_out) {
+    else if (state == red_in || state == red_out || state == dub_red_out || state == in_out) {
         //puts("Redirection");
         redirects(argc, argv, state);
         return 0;
@@ -246,6 +246,7 @@ int run_ext_exe(int argc, char **argv, const int state) {
 }
 
 int redirects(int argc, char **argv, const int state) {
+    //printf("Executing: %s\n", argv[0]);
     int newstdin;
     int newstdout;
 
@@ -263,6 +264,7 @@ int redirects(int argc, char **argv, const int state) {
 
     //child
     else {
+        //puts("Child forked.");
         if (state == red_in) {
             //printf("Input Redirection:\t%s\n", argv[argc - 1]);
             newstdin = open(argv[argc - 1], O_RDONLY);
@@ -270,48 +272,41 @@ int redirects(int argc, char **argv, const int state) {
                 perror("Input couldn't be found");
                 return 1;
             }
-            close(0);
-
             //replace stdin with specified file
+            close(0);
             dup(newstdin);
             close(newstdin);
         }
 
         else if (state == red_out) {
-            //printf("Output Redirection:\t%s\n", argv[argc - 1]);
-            newstdout = open(argv[argc - 1], O_WRONLY|O_CREAT,S_IRWXU|S_IRWXG|S_IRWXO);
+            //printf("Output Redirection:\t%s\n", argv[0]);
+            newstdout = open(argv[argc - 1], O_WRONLY|O_CREAT, S_IRWXU|S_IRWXG|S_IRWXO);
             if (newstdout < 0) {
-                perror("Output couldn't be found");
+                perror("Output creation failed");
                 return 1;
             }
-            close(1);
-
             //replace stdout with specified file
+            close(1);
             dup(newstdout);
             close(newstdout);
         }
 
         else if(state == dub_red_out) {
-            newstdout = open(argv[argc - 1], O_WRONLY|O_CREAT,S_IRWXU|S_IRWXG|S_IRWXO); /*change these parameters*/
+            newstdout = open(argv[argc - 1], O_WRONLY|O_CREAT|O_APPEND, S_IRWXU|S_IRWXG|S_IRWXO);
             if (newstdout < 0) {
-                perror("Output couldn't be found");
+                perror("Output creation failed");
                 return 1;
             }
-            close(1);
-
             //replace stdout with specified file
+            close(1);
             dup(newstdout);
             close(newstdout);
         }
 
-        else if (state == dub_red_in) { /* delete???? */
-            newstdout = open(argv[argc - 1], O_WRONLY|O_CREAT,S_IRWXU|S_IRWXG|S_IRWXO);
-        }
-
         //input && output redirection
         else {
-            newstdin = open(argv[argc - 3], O_RDONLY);
-            newstdout = open(argv[argc - 1], O_WRONLY|O_CREAT,S_IRWXU|S_IRWXG|S_IRWXO);
+            newstdin = open(argv[2], O_RDONLY);
+            newstdout = open(argv[argc - 1], O_WRONLY|O_CREAT, S_IRWXU|S_IRWXG|S_IRWXO);
 
             if (newstdout < 0 || newstdin < 0) {
                 perror("File couldn't be found");
@@ -327,15 +322,29 @@ int redirects(int argc, char **argv, const int state) {
 
             close(newstdin);
             close(newstdout);
-
         }
-        /*
-        //printf("Child executing: %s\n", argv[0]);
+        argv[1] = NULL;
 
-        //dup2(stdin, 1);
-        //close(stdin) || stdout;
+        //check if it's an internal command first
+        if (strcmp(argv[0], "dir") == 0) {
+            dir(argc, argv);
+            return 0;
+        }
+        else if (strcmp(argv[0], "environ") == 0) {
+            environ();
+            return 0;
+        }
 
-        //launch exe from current dir
+        else if (strcmp(argv[0], "echo") == 0) {
+            echo(argv);
+            return 0;
+        }
+        else if (strcmp(argv[0], "help") == 0) {
+            help();
+            return 0;
+        }
+
+        //if not internal, must be external
         execvp(argv[0], argv);
 
         //else, search the bin
@@ -353,9 +362,8 @@ int redirects(int argc, char **argv, const int state) {
         execvp(shellpath, argv);
 
         //command doesn't exist otherwise
-        perror("Command not found");
+        perror("[Redirection] Command not found");
         return 1;
-         */
     }
     return 0;
 }
@@ -364,42 +372,108 @@ int pipes(int argc, char **argv) {
     //create file descriptor
     int pfds[2];
 
-    //create pipe b4 fork, pipe shared by both processes
-    if (pipe(pfds) == 0) {
-        //child
-        if (fork() == 0) {
-            //close stdout
-            close(1);
+    //create pipe before fork, pipe shared by both processes
+    int pip = pipe(pfds);
 
-            //set stdout at write end
-            dup2(pfds[1], 1);
+    if (pip < 0) {
+        perror("Piping error");
+        return 1;
+    }
 
-            //close read end
-            close(pfds[0]);
+    //fork
+    pid_t rc = fork();
 
-            /*
-            if (handler1 != NULL) {
-                handler1(argv1[0], argv1);
-            }
-             */
+    if (rc < 0) {
+        perror("[pipes] forking error:");
+        return 1;
+    }
+
+    //parent
+    else if (rc > 0) {
+        //close stdin
+        close(0);
+
+        //set stdin to the output pipe
+        dup2(pfds[0], 0);
+
+        //close write end
+        close(pfds[1]);
+
+        //wait for child to finish process before taking input
+        wait(&rc);
+
+        //create another child process to execute 2nd command
+        pid_t rc2 = fork();
+
+        if (rc2 < 0) {
+            perror("[Piping] Fork of fork error");
+            return 1;
         }
+
         //parent
-        else {
-            //close stdin
-            close(0);
-
-            //set stdin as read end
-            dup2(pfds[0], 0);
-
-            //close write end
-            close(pfds[1]);
-
-            /*
-            if (handler2 != NULL) {
-                handler2(argv2[0], argv2);
-            }
-             */
+        else if (rc2 > 0) {
+            wait(&rc2);
         }
+
+        //child
+        else{
+            argv[0] = "wc";
+            argv[1] = NULL;
+
+            execvp(argv[0], argv);
+
+            //else, search the bin
+            //puts("Searching bin ...");
+            char *binpath = getenv("PATH");
+            strcat(binpath, "/");
+            strcat(binpath, argv[0]);
+            execvp(binpath, argv);
+
+            //finally, search the shell's directory
+            //puts("Searching shell directory ...");
+            char *shellpath = getenv("SHELL_PATH");
+            strcat(shellpath, "/");
+            strcat(shellpath, argv[0]);
+            execvp(shellpath, argv);
+
+            //command doesn't exist otherwise
+            perror("[Piping] Command not found");
+            return 1;
+        }
+    }
+
+    //child
+    else {
+        //close stdout
+        close(1);
+
+        //set stdout to the input pipe
+        dup2(pfds[1], 1);
+
+        //close read end
+        close(pfds[0]);
+
+        argv[2] = NULL;
+
+        execvp(argv[0], argv);
+
+        //else, search the bin
+        //puts("Searching bin ...");
+        char *binpath = getenv("PATH");
+        strcat(binpath, "/");
+        strcat(binpath, argv[0]);
+        execvp(binpath, argv);
+
+        //finally, search the shell's directory
+        //puts("Searching shell directory ...");
+        char *shellpath = getenv("SHELL_PATH");
+        strcat(shellpath, "/");
+        strcat(shellpath, argv[0]);
+        execvp(shellpath, argv);
+
+        //command doesn't exist otherwise
+        perror("[Piping] Command not found");
+        return 1;
     }
     return 0;
 }
