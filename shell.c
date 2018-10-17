@@ -48,8 +48,8 @@ int run_shell(int argn, char** args) {
             break;
         }*/
 
-        int ch;
-        while((ch = getchar()) != '\n' && ch != EOF);
+        //int ch;
+        //while((ch = getchar()) != '\n' && ch != EOF);
 
         //clear stdin
         fflush(stdin);
@@ -75,7 +75,6 @@ int run_shell(int argn, char** args) {
 
         //parse it
         state = parse(line, &argc1, argv1, argv2);
-
         /*
         for (int i = 0; i < *argc; i++) {
             printf("argv1[%d]:\t%s\n", i, argv1[i]);
@@ -89,7 +88,6 @@ int run_shell(int argn, char** args) {
             run_ext_exe(*argc, argv1, argv2, state);
         }
     }
-    return 0;
 }
 #pragma clang diagnostic pop
 
@@ -97,6 +95,9 @@ int run_shell_cmd(const int argc, char **argv1, char ** argv2, const int state) 
     /* print passed arguments
     for(int i = 0; i < argc; i++) {
         printf("%s\n", argv1[i]);
+    }
+    for(int i = 0; i < 2; i++) {
+        printf("%s\", argv2[i]);
     }
     printf("argc:\t%d", argc);
     printf("state:\t%d", state);
@@ -130,9 +131,7 @@ int run_shell_cmd(const int argc, char **argv1, char ** argv2, const int state) 
     }
 
     else if(strcmp(argv1[0], "dir") == 0) {
-        //puts("dir");
         if (state != normal) {
-            //puts("dir redirct");
             redirects(argc, argv1, argv2, state);
             return 0;
         }
@@ -166,6 +165,9 @@ int run_ext_exe(int argc, char **argv1, char ** argv2, const int state) {
     /* print passed arguments
     for(int i = 0; i < argc; i++) {
         printf("%s\n", argv1[i]);
+    }
+    for(int i = 0; i < 2; i++) {
+        printf("%s\", argv2[i]);
     }
     printf("argc:\t%d", argc);
     printf("state:\t%d", state);
@@ -368,6 +370,9 @@ int pipes(char **argv1, char **argv2) {
     for(int i = 0; i < argc; i++) {
         printf("%s\n", argv1[i]);
     }
+    for(int i = 0; i < 2; i++) {
+        printf("%s\", argv2[i]);
+    }
     printf("argc:\t%d", argc);
     */
     //create file descriptor
@@ -416,7 +421,7 @@ int pipes(char **argv1, char **argv2) {
             wait(&rc2);
         }
 
-        //child
+        //child2 after child1 finishes
         else{
             execvp(argv2[0], argv2);
 
@@ -475,6 +480,13 @@ int pipes(char **argv1, char **argv2) {
 }
 
 int backgrounding(char** argv1) {
+    /*
+    char *token = strtok(*argv1, " ");
+    while (token != NULL) {
+        printf("%s\n", token);
+        token = strtok(NULL, " ");
+    }
+     */
     //fork process
     pid_t rc = fork();
     if (rc < 0) {
