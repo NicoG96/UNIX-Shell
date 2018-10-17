@@ -21,7 +21,7 @@
 //functions
 void run_shell();
 void batch_exe(int argc, char** argv);
-void parse(char* line, int* argc, char** argv, int* state);
+int parse(char* line, int* argc1, char** argv, char ** argv2);
 void echo(char **argv);
 void environ();
 void cd(int argc, char **argv);
@@ -30,10 +30,10 @@ void dir(int argc, char **argv);
 void help();
 void pause_cmd();
 void quit_cmd();
-int run_shell_cmd(int argc, char** argv, int state);
-int run_ext_exe(int argc, char** argv, int state);
-int pipes(int argc, char** argv);
-int redirects(int argc, char **argv, int state);
+int run_shell_cmd(int argc, char** argv1, char ** argv2, int state);
+int run_ext_exe(int argc, char** argv, char ** argv2, int state);
+int pipes(char** argv1, char** argv2);
+int redirects(int argc, char **argv1, char ** argv2, int state);
 int backgrounding(char** argv);
 void sandbox();
 
@@ -42,7 +42,6 @@ enum state {
     normal,
     red_in,
     red_out,
-    dub_red_in,
     dub_red_out,
     in_out,
     piping,
