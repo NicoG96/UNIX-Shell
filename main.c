@@ -1,19 +1,19 @@
 #include "shell.h"
 
-int main(int argc, char **argv) {
+int main(int argn, char **args) {
     /*
     //print arguments
     for (int i = 0; i < argc; i++) {
         printf("%s\n", argv[i]);
     }
     */
+    //if there's arguments, run as batch file
+    if (argn > 1) {
+        batch_exe(argn, args);
+    }
 
-    //if batch file
-    if (argc == 2) {
-        run_batch(argc, argv);
-
-    //otherwise, get input from user
-    }else{
+    //otherwise, get command from user
+    else {
         run_shell();
     }
     return 0;
