@@ -22,14 +22,20 @@ int parse(char* line, int* argc1, char** argv1, char** argv2) {
             state = red_in;
             argv = argv2;
             argc = &argc2;
-            token = strtok(NULL, " ");
+            if(!(token = strtok(NULL, " "))) {
+                perror("Invalid command");
+                return -1;
+            }
         }
         else if (strcmp(token, ">") == 0) {
             //if there was an input redirection earlier
             if (state == red_in) {
                 //it's a special type
                 state = in_out;
-                token = strtok(NULL, " ");
+                if(!(token = strtok(NULL, " "))) {
+                    perror("Invalid command");
+                    return -1;
+                }
 
                 //have argv2 hold the 2 redirections
                 argv[*argc] = calloc(1, strlen(token));
@@ -41,19 +47,28 @@ int parse(char* line, int* argc1, char** argv1, char** argv2) {
             state = red_out;
             argv = argv2;
             argc = &argc2;
-            token = strtok(NULL, " ");
+            if(!(token = strtok(NULL, " "))) {
+                perror("Invalid command");
+                return -1;
+            }
         }
         else if ((strcmp(token, ">>") == 0)) {
             state = dub_red_out;
             argv = argv2;
             argc = &argc2;
-            token = strtok(NULL, " ");
+            if(!(token = strtok(NULL, " "))) {
+                perror("Invalid command");
+                return -1;
+            }
         }
         else if ((strcmp(token, "|") == 0)) {
             state = piping;
             argv = argv2;
             argc = &argc2;
-            token = strtok(NULL, " ");
+            if(!(token = strtok(NULL, " "))) {
+                perror("Invalid command");
+                return -1;
+            }
         }
         else if ((strcmp(token, "&") == 0)) {
             state = background;
@@ -67,5 +82,6 @@ int parse(char* line, int* argc1, char** argv1, char** argv2) {
         argv[*argc] = NULL;
         token = strtok(NULL, " ");
     }
+    //printf("%d\n", state);
     return state;
 }
