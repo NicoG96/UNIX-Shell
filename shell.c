@@ -96,6 +96,7 @@ int run_shell(int argn, char** args) {
             run_ext_exe(*argc, argv1, argv2, state);
         }
     }
+    return 1;
 }
 
 int run_shell_cmd(const int argc, char **argv1, char ** argv2, const int state) {
