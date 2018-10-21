@@ -58,7 +58,7 @@ Upon launch, the shell will be waiting for a command. Internal commands (built i
         * clear: clear the terminal output log
         * pause: put the terminal on hold until a key is pressed
         * help: manual to help you navigate the shell
-        * quit: qui the shell
+        * quit: quit the shell
         
 In addition to these built-in functions, the shell supports execution of native UNIX programs, as well. If you are unfamiliar with these programs, you can read about them [here](https://maker.pro/linux/tutorial/basic-linux-commands-for-beginners).
 
